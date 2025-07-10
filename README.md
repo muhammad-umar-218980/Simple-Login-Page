@@ -15,7 +15,9 @@ A simple Node.js and Express web application for user registration and login, wi
 ```
 ├── public/
 │   ├── login.html
-│   └── register.html
+│   ├── register.html
+│   ├── welcome.html
+│   └── welcome-login.html
 ├── server.js
 ├── users.txt
 ├── package.json
@@ -41,9 +43,12 @@ A simple Node.js and Express web application for user registration and login, wi
    ```
    The server will run at [http://localhost:3000](http://localhost:3000).
 
+
 4. **Open in your browser:**
    - Visit `/register.html` to create a new account.
    - Visit `/login.html` to log in.
+   - After registration, users see a responsive welcome page.
+   - After login, users are greeted by name on a personalized welcome page.
 
 ## Notes
 

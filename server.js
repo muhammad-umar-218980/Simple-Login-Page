@@ -12,86 +12,86 @@ const usersFile = 'users.txt';
 
 const serverErrorResponse = `
   <script>
-    alert('Server error');
-    window.location.href = '/register.html';
+	alert('Server error');
+	window.location.href = '/register.html';
   </script>
 `;
 
 const registrationFailedResponse = `
   <script>
-    alert('Registration failed');
-    window.location.href = '/register.html';
+	alert('Registration failed');
+	window.location.href = '/register.html';
   </script>
 `;
 
 const getEmailInUseResponse = (registerPage) => {
 	return `
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'text-red-500 text-sm mt-1';
-        errorDiv.textContent = 'Email already in use. Try a different one.';
-        
-        const emailContainer = document.querySelector('input[name="email"]').parentNode;
-        emailContainer.parentNode.insertBefore(errorDiv, emailContainer.nextSibling);
-      });
-    </script>
-    ${registerPage}
+	<script>
+	  document.addEventListener('DOMContentLoaded', function() {
+		const errorDiv = document.createElement('div');
+		errorDiv.className = 'text-red-500 text-sm mt-1';
+		errorDiv.textContent = 'Email already in use. Try a different one.';
+		
+		const emailContainer = document.querySelector('input[name="email"]').parentNode;
+		emailContainer.parentNode.insertBefore(errorDiv, emailContainer.nextSibling);
+	  });
+	</script>
+	${registerPage}
   `;
 };
 
 const getInvalidCredentialsResponse = (loginPage) => {
 	return `
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'text-red-500 text-sm mt-1';
-        errorDiv.textContent = 'Invalid email or password.';
-        
-        const form = document.querySelector('form');
-        form.insertBefore(errorDiv, form.firstChild);
-      });
-    </script>
-    ${loginPage}
+	<script>
+	  document.addEventListener('DOMContentLoaded', function() {
+		const errorDiv = document.createElement('div');
+		errorDiv.className = 'text-red-500 text-sm mt-1';
+		errorDiv.textContent = 'Invalid email or password.';
+		
+		const form = document.querySelector('form');
+		form.insertBefore(errorDiv, form.firstChild);
+	  });
+	</script>
+	${loginPage}
   `;
 };
 
 const getEmailNotFoundResponse = (loginPage) => {
 	return `
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const errorDiv = document.createElement('div');
-        errorDiv.id = 'email-error';
-        errorDiv.className = 'text-red-500 text-sm mt-1';
-        errorDiv.textContent = 'Email not found';
-        
-        const emailContainer = document.querySelector('input[name="email"]').parentNode;
-        emailContainer.parentNode.insertBefore(errorDiv, emailContainer.nextSibling);
-        
-        const emailInput = document.querySelector('input[name="email"]');
-        emailInput.addEventListener('input', function() {
-          const error = document.getElementById('email-error');
-          if (error) error.remove();
-        });
-      });
-    </script>
-    ${loginPage}
+	<script>
+	  document.addEventListener('DOMContentLoaded', function() {
+		const errorDiv = document.createElement('div');
+		errorDiv.id = 'email-error';
+		errorDiv.className = 'text-red-500 text-sm mt-1';
+		errorDiv.textContent = 'Email not found';
+		
+		const emailContainer = document.querySelector('input[name="email"]').parentNode;
+		emailContainer.parentNode.insertBefore(errorDiv, emailContainer.nextSibling);
+		
+		const emailInput = document.querySelector('input[name="email"]');
+		emailInput.addEventListener('input', function() {
+		  const error = document.getElementById('email-error');
+		  if (error) error.remove();
+		});
+	  });
+	</script>
+	${loginPage}
   `;
 };
 
 const getIncorrectPasswordResponse = (loginPage) => {
 	return `
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'text-red-500 text-sm mt-1';
-        errorDiv.textContent = 'Incorrect password';
-        
-        const passwordContainer = document.querySelector('input[name="password"]').parentNode;
-        passwordContainer.parentNode.insertBefore(errorDiv, passwordContainer.nextSibling);
-      });
-    </script>
-    ${loginPage}
+	<script>
+	  document.addEventListener('DOMContentLoaded', function() {
+		const errorDiv = document.createElement('div');
+		errorDiv.className = 'text-red-500 text-sm mt-1';
+		errorDiv.textContent = 'Incorrect password';
+		
+		const passwordContainer = document.querySelector('input[name="password"]').parentNode;
+		passwordContainer.parentNode.insertBefore(errorDiv, passwordContainer.nextSibling);
+	  });
+	</script>
+	${loginPage}
   `;
 };
 
@@ -121,7 +121,9 @@ app.post('/register', (req, res) => {
 			if (err) {
 				return res.send(registrationFailedResponse);
 			} else {
-				res.redirect('/login.html');
+				// Send the welcome page as a response after successful registration
+				const welcomePage = fs.readFileSync(path.join(__dirname, 'public', 'welcome.html'), 'utf8');
+				res.send(welcomePage);
 			}
 		});
 	});
@@ -143,6 +145,7 @@ app.post('/login', (req, res) => {
 		const userBlocks = data.trim().split('\n\n');
 		let emailExists = false;
 		let passwordCorrect = false;
+		let fullName = '';
 
 		for (const block of userBlocks) {
 			const lines = block.split('\n');
@@ -150,6 +153,7 @@ app.post('/login', (req, res) => {
 				emailExists = true;
 				if (lines[2] === `Password: ${password}`) {
 					passwordCorrect = true;
+					fullName = lines[0].replace('Full Name: ', '');
 				}
 				break;
 			}
@@ -163,7 +167,8 @@ app.post('/login', (req, res) => {
 				const loginPage = fs.readFileSync(path.join(__dirname, 'public', 'login.html'), 'utf8');
 				return res.send(getIncorrectPasswordResponse(loginPage));
 			} else {
-				res.send(`Login successful! Welcome back, ${email}`);
+				// Redirect to the personalized welcome-login page with the user's name in the query string
+				res.redirect(`/welcome-login.html?name=${encodeURIComponent(fullName)}`);
 			}
 		}
 	});
