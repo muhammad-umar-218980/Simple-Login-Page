@@ -121,7 +121,6 @@ app.post('/register', (req, res) => {
 			if (err) {
 				return res.send(registrationFailedResponse);
 			} else {
-				// Send the welcome page as a response after successful registration
 				const welcomePage = fs.readFileSync(path.join(__dirname, 'public', 'welcome.html'), 'utf8');
 				res.send(welcomePage);
 			}
@@ -167,7 +166,6 @@ app.post('/login', (req, res) => {
 				const loginPage = fs.readFileSync(path.join(__dirname, 'public', 'login.html'), 'utf8');
 				return res.send(getIncorrectPasswordResponse(loginPage));
 			} else {
-				// Redirect to the personalized welcome-login page with the user's name in the query string
 				res.redirect(`/welcome-login.html?name=${encodeURIComponent(fullName)}`);
 			}
 		}
